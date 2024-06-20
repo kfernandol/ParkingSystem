@@ -107,8 +107,22 @@ namespace ParkingSystem
                     Date = DateTime.Now.ToString(),
                     SpaceAvailable = viewModel.ParkingStatus.SpacesAvailable
                 });
-
-
+            }
+            else if (data.StartsWith("Entrada abierta"))
+            {
+                viewModel.ParkingStatus.EntryDoorStatus = DoorStatus.Open;
+            }
+            else if (data.StartsWith("Entrada cerrada"))
+            {
+                viewModel.ParkingStatus.EntryDoorStatus = DoorStatus.Closed;
+            }
+            else if (data.StartsWith("Salida abierta"))
+            {
+                viewModel.ParkingStatus.ExitDoorStatus = DoorStatus.Open;
+            }
+            else if (data.StartsWith("Salida cerrada"))
+            {
+                viewModel.ParkingStatus.ExitDoorStatus = DoorStatus.Closed;
             }
         }
 
@@ -260,8 +274,33 @@ namespace ParkingSystem
             viewModel.SecondaryFilter = new List<string>();
             viewModel.ParkingHistory = GetHistory();
         }
-        private void SyncArduino_Click(object sender, RoutedEventArgs e)
+        private async void SyncArduino_Click(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                if (serialPort != null && serialPort.IsOpen)
+                {
+                    // Obtener el valor actual de SpacesAvailable
+                    int currentSpacesAvailable = 10 - viewModel.ParkingStatus.SpacesAvailable;
+
+                    // Enviar el valor al Arduino
+                    serialPort.WriteLine($"SET_COUNT:{currentSpacesAvailable}");
+
+                    // Espera a que el Arduino responda
+                    await Task.Delay(500);
+
+                    // Mostrar mensaje de sincronización exitosa
+                    MessageBox.Show("Sincronización exitosa!", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Error: Puerto serial no está abierto o no inicializado.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
 
         }
         #endregion
