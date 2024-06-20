@@ -127,7 +127,7 @@ namespace ParkingSystem
             _context.SaveChanges();
 
             // Carga el historial en el ViewModel
-            viewModel.ParkingHistory = _context.ParkingHistories.ToList();
+            viewModel.ParkingHistory = _context.ParkingHistories.OrderByDescending(x => x.Date).ToList();
         }
 
         public List<ParkingHistory> GetHistory()
